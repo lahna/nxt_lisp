@@ -39,7 +39,7 @@
   (roslisp:subscribe "/touch" "nxt_msgs/Contact" #'touch-cb)
   (roslisp:subscribe "/ultrasonic" "sensor_msgs/Range" #'sensor-cb)
   (roslisp:subscribe "/color_sensor" "nxt_msgs/Color" #'color-cb)
-;;;  (roslisp:subscribe "/joint_states" "sensor_msgs/JointState" #'motorSens-cb)
+  (roslisp:subscribe "/joint_states" "sensor_msgs/JointState" #'motorSens-cb)
   nil)
 ;;;----------------------------------------------------------------------------------
 ;;;defines Variable for motor State Sensor
@@ -47,13 +47,15 @@
 
 ;;;define callback for motor State Sensor
 (defun motorSens-cb (msg)
-  (roslisp:with-fields (JointState) msg
-    (setf *motorSens* JointState)))
+  (roslisp:with-fields (position) msg
+    (setf *motorSens* position)))
 
 ;;;define turn head (ultrasonic sensor)
-
-(defun turn-head-until ()
-  (set-motor-effort "motor_A" 0.7))
+(defmacro turn-head-until (condition)
+ `(while ,condition)
+  (set-motor-effort "motor_A" 0.7)
+  `(loop while ,condition)
+  (set-motor-effort "motor_A" 0.0))
 
 (defmacro check-head-position-left ()
   `(< -1.3 (motorSens)))
